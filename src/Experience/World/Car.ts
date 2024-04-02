@@ -27,7 +27,7 @@ export default class Car extends kokomi.Component {
   }
   update(): void {
     this.wheelModel?.children.forEach((item) => {
-      item.rotateZ(this.base.params.speed * 0.03);
+      item.rotateZ(-this.base.params.speed * 0.03);
     });
   }
   handleModel() {
