@@ -56,4 +56,14 @@ export const resources: kokomi.ResourceItem[] = [
     type: "hdrTexture",
     path: "texture/t_env_light.hdr",
   },
+  {
+    name: "driving",
+    type: "fbxModel",
+    path: "mesh/Driving.fbx",
+  },
+  {
+    name: "decal",
+    type: "texture",
+    path: "texture/decal.png",
+  },
 ];

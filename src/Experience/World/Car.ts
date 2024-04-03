@@ -35,6 +35,10 @@ export default class Car extends kokomi.Component {
     const bodyMat = body.material as THREE.MeshStandardMaterial;
     this.bodyMat = bodyMat;
     bodyMat.color = new THREE.Color("#26d6e9");
+    if (this.base.params.isFurina) {
+      bodyMat.color = new THREE.Color("white");
+      bodyMat.map = this.base.am.items["decal"];
+    }
 
     // @ts-ignore
     this.modelParts.forEach((item: THREE.Mesh) => {

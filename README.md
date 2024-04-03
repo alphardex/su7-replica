@@ -1,5 +1,9 @@
 # 小米 SU7 网站特效解析 demo
 
+demo 地址：https://su7-replica.netlify.app/
+
+demo（芙宁娜版）地址：https://su7-replica.netlify.app/#furina
+
 原网站地址：https://gamemcu.com/su7/
 
 ## 食用方法

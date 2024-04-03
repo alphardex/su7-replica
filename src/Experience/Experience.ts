@@ -44,8 +44,10 @@ export default class Experience extends kokomi.Base {
       bloomIntensity: 1,
       speedUpOpacity: 0,
       cameraFov: 33.4,
+      furinaLerpColor: 0,
       isRushing: false,
       disableInteract: false,
+      isFurina: window.location.hash === "#furina",
     };
 
     this.debug = new Debug();

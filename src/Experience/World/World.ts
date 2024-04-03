@@ -11,6 +11,7 @@ import StartRoom from "./StartRoom";
 import Car from "./Car";
 import Speedup from "./Speedup";
 import CameraShake from "./CameraShake";
+import Furina from "./Furina";
 
 export default class World extends kokomi.Component {
   declare base: Experience;
@@ -18,6 +19,7 @@ export default class World extends kokomi.Component {
   dynamicEnv!: DynamicEnv;
   startRoom!: StartRoom;
   car!: Car;
+  furina!: Furina;
   speedup!: Speedup;
   environment!: kokomi.Environment;
   cameraShake!: CameraShake;
@@ -87,6 +89,12 @@ export default class World extends kokomi.Component {
       this.car = car;
       car.addExisting();
 
+      if (this.base.params.isFurina) {
+        const furina = new Furina(this.base);
+        this.furina = furina;
+        furina.addExisting();
+      }
+
       const speedup = new Speedup(this.base);
       this.speedup = speedup;
       speedup.addExisting();
@@ -101,6 +109,7 @@ export default class World extends kokomi.Component {
           generateMipmaps: true,
         },
         textureType: THREE.UnsignedByteType,
+        ignoreObjects: [this.car.model.scene],
       });
       this.environment = environment;
 
@@ -153,6 +162,8 @@ export default class World extends kokomi.Component {
       THREE.LinearSRGBColorSpace;
     (items["ut_floor_roughness"] as THREE.Texture).wrapS = THREE.RepeatWrapping;
     (items["ut_floor_roughness"] as THREE.Texture).wrapT = THREE.RepeatWrapping;
+    (items["decal"] as THREE.Texture).flipY = false;
+    (items["decal"] as THREE.Texture).colorSpace = THREE.LinearSRGBColorSpace;
   }
   clearAllTweens() {
     this.t1.clear();
@@ -175,6 +186,7 @@ export default class World extends kokomi.Component {
       new THREE.Color("#000000")
     );
     this.startRoom.customFloorMat.uniforms.uReflectIntensity.value = 0;
+    this.furina?.setColor(new THREE.Color("#000000"));
 
     document.querySelector(".loader-screen")?.classList.add("hollow");
 
@@ -197,6 +209,7 @@ export default class World extends kokomi.Component {
       lightAlpha: 1,
       lightIntensity: 1,
       reflectIntensity: 25,
+      furinaLerpColor: 1,
       duration: 4,
       delay: 1,
       ease: "power2.inOut",
@@ -212,6 +225,8 @@ export default class World extends kokomi.Component {
         this.startRoom.customFloorMat.uniforms.uColor.value.set(lightColor);
         this.startRoom.customFloorMat.uniforms.uReflectIntensity.value =
           this.base.params.reflectIntensity;
+
+        this.furina?.setColor(lightColor);
       },
     });
     this.t3
@@ -261,6 +276,11 @@ export default class World extends kokomi.Component {
     const blackColor = new THREE.Color("#000000");
     const camera = this.base.camera as THREE.PerspectiveCamera;
 
+    const furinaColor = new THREE.Color();
+    const furinaFadeColor = new THREE.Color("#666666");
+
+    this.furina?.drive();
+
     this.t4
       .to(this.base.params, {
         speed: 4,
@@ -284,15 +304,26 @@ export default class World extends kokomi.Component {
         this.startRoom.lightMat.opacity = this.base.params.lightOpacity;
       },
     });
-    this.t6.to(this.base.params, {
-      floorLerpColor: 1,
-      duration: 4,
-      ease: "none",
-      onUpdate: () => {
-        floorColor.lerp(blackColor, this.base.params.floorLerpColor);
-        this.startRoom.customFloorMat.uniforms.uColor.value.set(floorColor);
+    this.t6.fromTo(
+      this.base.params,
+      {
+        floorLerpColor: 0,
+        furinaLerpColor: 0,
       },
-    });
+      {
+        floorLerpColor: 1,
+        furinaLerpColor: 1,
+        duration: 4,
+        ease: "none",
+        onUpdate: () => {
+          floorColor.lerp(blackColor, this.base.params.floorLerpColor);
+          this.startRoom.customFloorMat.uniforms.uColor.value.set(floorColor);
+
+          furinaColor.lerp(furinaFadeColor, this.base.params.furinaLerpColor);
+          this.furina?.setColor(furinaColor);
+        },
+      }
+    );
     this.t7.to(this.base.params, {
       envIntensity: 0.01,
       duration: 1,
@@ -317,7 +348,7 @@ export default class World extends kokomi.Component {
     await kokomi.sleep(1000);
     this.base.scene.environment = this.environment.texture;
     this.t9.to(this.base.params, {
-      carBodyEnvIntensity: 5,
+      carBodyEnvIntensity: 10,
       cameraShakeIntensity: 1,
       bloomLuminanceSmoothing: 0.4,
       bloomIntensity: 2,
@@ -344,6 +375,11 @@ export default class World extends kokomi.Component {
     const whiteColor = new THREE.Color("#ffffff");
     const camera = this.base.camera as THREE.PerspectiveCamera;
 
+    const furinaColor = new THREE.Color();
+    const furinaOriginalColor = new THREE.Color("#ffffff");
+
+    this.furina?.pause();
+
     this.t4.to(this.base.params, {
       speed: 0,
       duration: 2,
@@ -363,14 +399,21 @@ export default class World extends kokomi.Component {
     });
     this.t6.fromTo(
       this.base.params,
-      { floorLerpColor: 0 },
+      { floorLerpColor: 0, furinaLerpColor: 0 },
       {
         floorLerpColor: 1,
+        furinaLerpColor: 1,
         duration: 4,
         ease: "none",
         onUpdate: () => {
           floorColor.lerp(whiteColor, this.base.params.floorLerpColor);
           this.startRoom.customFloorMat.uniforms.uColor.value.set(floorColor);
+
+          furinaColor.lerp(
+            furinaOriginalColor,
+            this.base.params.furinaLerpColor
+          );
+          this.furina?.setColor(furinaColor);
         },
       }
     );
