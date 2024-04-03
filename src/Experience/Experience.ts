@@ -54,7 +54,15 @@ export default class Experience extends kokomi.Base {
 
     this.renderer.toneMapping = THREE.CineonToneMapping;
 
-    this.am = new kokomi.AssetManager(this, resources, {
+    let resourcesToLoad = resources;
+    if (!this.params.isFurina) {
+      resourcesToLoad = resourcesToLoad.filter(
+        (item) => !["driving", "decal"].includes(item.name)
+      );
+    }
+    console.log(resourcesToLoad);
+
+    this.am = new kokomi.AssetManager(this, resourcesToLoad, {
       useMeshoptDecoder: true,
     });
 

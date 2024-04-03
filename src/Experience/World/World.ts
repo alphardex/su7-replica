@@ -162,8 +162,11 @@ export default class World extends kokomi.Component {
       THREE.LinearSRGBColorSpace;
     (items["ut_floor_roughness"] as THREE.Texture).wrapS = THREE.RepeatWrapping;
     (items["ut_floor_roughness"] as THREE.Texture).wrapT = THREE.RepeatWrapping;
-    (items["decal"] as THREE.Texture).flipY = false;
-    (items["decal"] as THREE.Texture).colorSpace = THREE.LinearSRGBColorSpace;
+
+    if (this.base.params.isFurina) {
+      (items["decal"] as THREE.Texture).flipY = false;
+      (items["decal"] as THREE.Texture).colorSpace = THREE.LinearSRGBColorSpace;
+    }
   }
   clearAllTweens() {
     this.t1.clear();
